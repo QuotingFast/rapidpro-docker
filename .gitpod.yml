@@ -1,0 +1,8 @@
+tasks:
+  - name: Start RapidPro
+    init: echo "Installing dependencies..."
+    command: docker compose up -d
+
+ports:
+  - port: 80
+    onOpen: open-browser
