@@ -2,7 +2,7 @@ services:
   # Web service
   - type: web
     name: rapidpro-web
-    env: docker
+    runtime: docker
     dockerfilePath: ./rapidpro/Dockerfile
     dockerContext: ./rapidpro
     dockerCommand: webapp
@@ -18,7 +18,7 @@ services:
   # Worker process
   - type: worker
     name: rapidpro-celery
-    env: docker
+    runtime: docker
     dockerfilePath: ./rapidpro/Dockerfile
     dockerContext: ./rapidpro
     dockerCommand: celery
@@ -30,7 +30,7 @@ services:
   # Mailroom service
   - type: web
     name: rapidpro-mailroom
-    env: docker
+    runtime: docker
     dockerfilePath: Dockerfile
     dockerContext: https://github.com/nyaruka/mailroom.git#v10.0.0
     envVars:
@@ -58,7 +58,7 @@ services:
   # Courier service
   - type: web
     name: rapidpro-courier
-    env: docker
+    runtime: docker
     dockerfilePath: Dockerfile
     dockerContext: https://github.com/nyaruka/courier.git#v10.0.0
     envVars:
@@ -83,7 +83,7 @@ services:
   # Indexer service
   - type: worker
     name: rapidpro-indexer
-    env: docker
+    runtime: docker
     dockerfilePath: Dockerfile
     dockerContext: https://github.com/nyaruka/rp-indexer.git#v10.0.0
     envVars:
@@ -97,14 +97,14 @@ services:
 # Database services
 databases:
   - name: postgres-db
-    plan: standard
-    postgresMajorVersion: 15
+    plan: starter
+    postgresMajorVersion: "15"
     ipAllowList: [] # allow all
 
   - name: redis
-    plan: standard
+    plan: starter
     ipAllowList: [] # allow all
 
   - name: elasticsearch
-    plan: standard
+    plan: starter
     ipAllowList: [] # allow all
