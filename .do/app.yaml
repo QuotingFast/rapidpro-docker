@@ -1,0 +1,47 @@
+name: rapidpro
+region: nyc
+services:
+  - name: rapidpro-web
+    dockerfile_path: ./rapidpro/Dockerfile
+    source_dir: ./rapidpro
+    github:
+      branch: render-deployment
+      deploy_on_push: true
+      repo: QuotingFast/rapidpro-docker
+    http_port: 8000
+    routes:
+      - path: /
+    envs:
+      - key: MAILROOM_URL
+        value: ${app.rapidpro-mailroom.PUBLIC_URL}
+      - key: MAILROOM_AUTH_TOKEN
+        value: topsecret
+        type: SECRET
+
+  - name: rapidpro-mailroom
+    dockerfile_path: Dockerfile
+    git:
+      repo_clone_url: https://github.com/nyaruka/mailroom.git
+      branch: v10.0.0
+    http_port: 8090
+    routes:
+      - path: /mr
+    envs:
+      - key: MAILROOM_ADDRESS
+        value: 0.0.0.0
+      - key: MAILROOM_AUTH_TOKEN
+        value: topsecret
+        type: SECRET
+      - key: MAILROOM_COURIER_AUTH_TOKEN
+        value: topsecret
+        type: SECRET
+      - key: MAILROOM_LOG_LEVEL
+        value: info
+
+databases:
+  - engine: PG
+    name: rapidpro-db
+    version: "15"
+  - engine: REDIS
+    name: rapidpro-redis
+    version: "6"
