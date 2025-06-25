@@ -1,0 +1,110 @@
+services:
+  # Web service
+  - type: web
+    name: rapidpro-web
+    env: docker
+    dockerfilePath: ./rapidpro/Dockerfile
+    dockerContext: ./rapidpro
+    dockerCommand: webapp
+    envVars:
+      - key: MAILROOM_URL
+        value: https://rapidpro-mailroom.onrender.com
+      - key: MAILROOM_AUTH_TOKEN
+        value: topsecret
+        # Consider making this a Render secret
+    healthCheckPath: /
+    buildCommand: ""
+
+  # Worker process
+  - type: worker
+    name: rapidpro-celery
+    env: docker
+    dockerfilePath: ./rapidpro/Dockerfile
+    dockerContext: ./rapidpro
+    dockerCommand: celery
+    envVars:
+      - key: MAILROOM_URL
+        value: https://rapidpro-mailroom.onrender.com
+    buildCommand: ""
+  
+  # Mailroom service
+  - type: web
+    name: rapidpro-mailroom
+    env: docker
+    dockerfilePath: Dockerfile
+    dockerContext: https://github.com/nyaruka/mailroom.git#v10.0.0
+    envVars:
+      - key: MAILROOM_ADDRESS
+        value: 0.0.0.0
+      - key: MAILROOM_DB
+        fromDatabase:
+          name: postgres-db
+          property: connectionString
+      - key: MAILROOM_REDIS
+        fromService:
+          name: redis
+          type: redis
+          property: connectionString
+      - key: MAILROOM_AUTH_TOKEN
+        value: topsecret
+        # Consider making this a Render secret
+      - key: MAILROOM_COURIER_AUTH_TOKEN
+        value: topsecret
+        # Consider making this a Render secret
+      - key: MAILROOM_LOG_LEVEL
+        value: info
+    healthCheckPath: /mr/
+
+  # Courier service
+  - type: web
+    name: rapidpro-courier
+    env: docker
+    dockerfilePath: Dockerfile
+    dockerContext: https://github.com/nyaruka/courier.git#v10.0.0
+    envVars:
+      - key: COURIER_ADDRESS
+        value: 0.0.0.0
+      - key: COURIER_DB
+        fromDatabase:
+          name: postgres-db
+          property: connectionString
+      - key: COURIER_REDIS
+        fromService:
+          name: redis
+          type: redis
+          property: connectionString
+      - key: COURIER_AUTH_TOKEN
+        value: topsecret
+        # Consider making this a Render secret
+      - key: COURIER_LOG_LEVEL
+        value: info
+    healthCheckPath: /
+
+  # Indexer service
+  - type: worker
+    name: rapidpro-indexer
+    env: docker
+    dockerfilePath: Dockerfile
+    dockerContext: https://github.com/nyaruka/rp-indexer.git#v10.0.0
+    envVars:
+      - key: INDEXER_DB
+        fromDatabase:
+          name: postgres-db
+          property: connectionString
+      - key: INDEXER_LOG_LEVEL
+        value: info
+
+# Database services
+databases:
+  - name: postgres-db
+    plan: standard
+    postgresMajorVersion: 15
+    ipAllowList: [] # allow all
+
+  - name: redis
+    plan: standard
+    ipAllowList: [] # allow all
+
+  - name: elasticsearch
+    plan: standard
+    ipAllowList: [] # allow all
